@@ -16,5 +16,3 @@ t/06_session.t
 examples/Makefile
 examples/rpctiny
 examples/patches/0001-fix-tls-verify-clientauth.patch
-META.yml                                 Module YAML meta-data (added by MakeMaker)
-META.json                                Module JSON meta-data (added by MakeMaker)
