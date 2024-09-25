@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 #
 # rpctiny test client for RPC::Switch::Client::Tiny module
 #
@@ -44,8 +44,6 @@ use Sys::Hostname;
 use Getopt::Std;
 use Data::Dumper;
 use Config::Tiny;
-use FindBin qw($Bin);
-use lib ("$Bin/../plib", "$Bin/lib"); # search modules in local lib dir
 use RPC::Switch::Client::Tiny;
 my %opt;
 
@@ -204,3 +202,163 @@ if ($opt{w} || $opt{W}) {
 }
 $s->close();
 
+__END__
+
+=head1 NAME
+
+rpctiny - command line client and test worker for RPC-Switch
+
+=head1 SYNOPSIS
+
+  rpctiny [-H <host:port>] [-S] [-C <cert>] [-K <key>] [-V <cafile>]
+          [-A <auth_method>] [-l <login>] [-c <config>] [-t <timeout>]
+          [-m <method>] [-v|-q] [-j] [<json-param>]
+
+  rpctiny -w|-W <workername> [-a <maxasync>] [-F] [-m <method>]
+          [connection options] ['{ <worker-code> }']
+
+  rpctiny -h
+
+=head1 DESCRIPTION
+
+B<rpctiny> connects to an RPC-Switch server with the
+L<RPC::Switch::Client::Tiny> module.
+
+In client mode it calls a method and prints the result. The params
+are given as a single json or perl-format argument.
+
+In worker mode (B<-w> or B<-W>) it announces a method and handles
+the incoming requests until it is stopped with ctrl-c. The handler
+is the given perl code block, or a builtin pong handler.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-H> I<host:port>
+
+rpc-switch address and port. The default is 127.0.0.1 with port
+6551, or port 6850 when TLS is used.
+
+=item B<-S>
+
+Use TLS for the rpc-switch connection. This defaults the auth method
+to I<clientcert>.
+
+=item B<-C> I<cert>
+
+TLS client certificate file.
+
+=item B<-K> I<key>
+
+TLS client key file.
+
+=item B<-V> I<cafile>
+
+CA file to verify the server certificate.
+
+=item B<-A> I<auth_method>
+
+Auth method. The default is I<password>, or I<clientcert> with B<-S>.
+
+=item B<-l> I<login>[:I<token>]
+
+Login name and optional token. The default is looked up in
+F<~/.netrc>, else I<theEmployee>.
+
+=item B<-c> I<config>
+
+Read the connection settings from the C<[rpc-switch]> section of
+an ini-style config file (see L</CONFIGURATION>).
+
+=item B<-m> I<method>
+
+Method to call or announce. The client default is I<rpcswitch.ping>,
+the worker default is I<bar.add:$USER>. A I<method:platform> suffix
+selects a platform, as a request param for calls and as a worker
+filter.
+
+=item B<-t> I<timeout>
+
+Timeout for rpc responses.
+
+=item B<-w>
+
+Start a test worker. An optional C<'{ ... }'> argument is used as
+the handler sub body, which gets the request params as first argument.
+
+=item B<-W> I<workername>
+
+Like B<-w>, with the given worker name instead of I<pingpong>.
+
+=item B<-a> I<maxasync>
+
+Run up to I<maxasync> forked workers using async RES_WAIT
+notification.
+
+=item B<-F>
+
+Use flowcontrol in async worker mode.
+
+=item B<-v>
+
+Verbose, print the request trace and the resolved config.
+
+=item B<-q>
+
+Quiet, just print the result (default).
+
+=item B<-j>
+
+Pretty-print json output.
+
+=item B<-h>
+
+Print the usage and the resolved config.
+
+=back
+
+=head1 CONFIGURATION
+
+The config file given by B<-c> uses an ini-style C<[rpc-switch]>
+section. The supported keys are I<address>, I<port>, I<who>, I<token>,
+I<auth_method>, I<tls>, I<tls_cert>, I<tls_key>, I<tls_ca> and
+I<netrc>. Command line options override the config file.
+
+  [rpc-switch]
+  address = 127.0.0.1
+  port = 6850
+  tls = 1
+  tls_cert = rpcclient.crt
+  tls_key = rpcclient.pem
+
+If no login is given, I<who> and I<token> are read from F<~/.netrc>.
+The machine entries are tried in the order I<netrc> config value,
+I<address:port>, and I<address>.
+
+=head1 EXAMPLES
+
+  rpctiny -m rpcswitch.ping
+  rpctiny -m rpcswitch.get_methods -j
+  rpctiny -m rpcswitch.get_method_details -j '{"method": "foo.add"}'
+  rpctiny -m foo.add -v '{"counter": 10, "step": 2}'
+  rpctiny -m other.ping:test '{val => "tiny"}'
+
+  rpctiny -w -m bar.add '{ my ($params) = @_; return {msg => "got $params->{val}"} }'
+
+=head1 SEE ALSO
+
+L<RPC::Switch::Client::Tiny>, L<https://github.com/a6502/rpc-switch>
+
+=head1 AUTHORS
+
+Barnim Dzwillo @ Strato AG
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2022 by Barnim Dzwillo
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut

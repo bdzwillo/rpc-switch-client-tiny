@@ -17,7 +17,7 @@ use RPC::Switch::Client::Tiny::Netstring;
 use RPC::Switch::Client::Tiny::Async;
 use RPC::Switch::Client::Tiny::SessionCache;
 
-our $VERSION = '1.67';
+our $VERSION = '1.68';
 
 sub new {
 	my ($class, %args) = @_;
@@ -777,8 +777,8 @@ This module works on a single socket connection, and has no
 dependencies on the Mojo framework like the L<RPC::Switch::Client>
 module.
 
-The rpctiny tool included in the examples directory shows how to
-configure and call a worker handler using a local installation
+The L<rpctiny> command line tool installed with this module shows
+how to configure and call a worker handler using a local installation
 of the rpc-switch server.
 
 =head2 References

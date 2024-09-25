@@ -14,5 +14,4 @@ t/04_client.t
 t/05_async.t
 t/06_session.t
 examples/Makefile
-examples/rpctiny
-examples/patches/0001-fix-tls-verify-clientauth.patch
+bin/rpctiny
