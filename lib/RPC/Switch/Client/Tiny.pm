@@ -17,7 +17,7 @@ use RPC::Switch::Client::Tiny::Netstring;
 use RPC::Switch::Client::Tiny::Async;
 use RPC::Switch::Client::Tiny::SessionCache;
 
-our $VERSION = '1.68';
+our $VERSION = '1.69';
 
 sub new {
 	my ($class, %args) = @_;
@@ -560,8 +560,12 @@ sub rpc_handler {
 			@pipes = map { $_->{reader} } values %{$self->{async}{jobs}};
 		}
 		my $timeout = $self->rpc_timeout($call_timeout);
+		# Unread data might be internally buffered in the SSL stack.
+		# To detect such buffering pending() need to be used.
+		#
+		my $ssl_pending = (ref($self->{sock}) eq 'IO::Socket::SSL') && $self->{sock}->pending();
 
-		if ($timeout || @pipes) {
+		if (($timeout || @pipes) && !$ssl_pending) {
 			my @ready = IO::Select->new(($self->{sock}, @pipes))->can_read($timeout);
 			next if (@ready == 0) && $!{EINTR}; # $! is not reset on success
 			die rpc_error('jsonrpc', 'receive timeout') unless (@ready > 0);

@@ -1,5 +1,8 @@
 Revision history for Perl extension RPC::Switch::Client::Tiny.
 
+1.69  2024-12-02
+	- use pending() to detect unread data buffered in the SSL stack
+
 1.68  2024-09-25
 	- updated license & github repo
 	- install rpctiny tool as bin/rpctiny (moved from examples)

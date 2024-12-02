@@ -13,5 +13,6 @@ t/03_netstring.t
 t/04_client.t
 t/05_async.t
 t/06_session.t
+t/07_ssl.t
 examples/Makefile
 bin/rpctiny
